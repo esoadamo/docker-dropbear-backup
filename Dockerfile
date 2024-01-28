@@ -17,4 +17,4 @@ HEALTHCHECK --interval=1m --timeout=3s \
   CMD timeout 2 nc 127.0.0.1 22 | grep -qE "^SSH.*dropbear"
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["-RFEmwsgk", "-p", "22", "-c", "/usr/local/bin/ssh_command.sh"]
+CMD ["-RFEmwsgkj", "-p", "22"]
