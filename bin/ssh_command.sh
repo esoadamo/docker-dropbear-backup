@@ -70,7 +70,10 @@ case "${SSH_COMMAND_BIN}" in
 		    --ro-bind /usr /usr \
 			--ro-bind /etc /etc \
 			--ro-bind /var /var \
-			--bind / / \
+			--ro-bind /lib /lib \
+			--ro-bind /bin /bin \
+			--dev /dev \
+			--unshare-pid \
 			--tmpfs /home \
 			--tmpfs /tmp \
 			--tmpfs /var/tmp \

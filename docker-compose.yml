@@ -16,5 +16,6 @@ services:
     # Required for SFTP to work with bubblewrap, https://github.com/flatpak/flatpak/issues/3027
     security_opt:
       - apparmor=unconfined
+      - seccomp=unconfined
     cap_add:
       - CAP_SYS_ADMIN
