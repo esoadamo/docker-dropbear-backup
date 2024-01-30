@@ -3,7 +3,7 @@
 # Create backup user
 if [ "${BACKUP_USER:=rbackup}" ] && ! grep -q -s "^${BACKUP_USER}" /etc/passwd; then
 	adduser --shell /bin/sh --uid "${BACKUP_UID:-11000}" --disabled-password "${BACKUP_USER}" && \
-	(cd "/home/${BACKUP_USER}" && mkdir -p .ssh && touch .ssh/authorized_keys) && \
+	( cd "/home/${BACKUP_USER}" && mkdir -p .ssh && touch .ssh/authorized_keys ) && \
 	chown -R "${BACKUP_USER}":"${BACKUP_USER}" "/home/${BACKUP_USER}/"*
 fi
 

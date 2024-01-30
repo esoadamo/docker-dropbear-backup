@@ -3,11 +3,13 @@ ARG BASE_IMAGE=library/alpine:latest
 FROM docker.io/${BASE_IMAGE}
 
 RUN \
-  apk add --update --no-cache dropbear borgbackup openssh-sftp-server rrsync \
+  apk add --update --no-cache dropbear borgbackup openssh-sftp-server rrsync bubblewrap \
   && rm -rf /var/cache/apk/*
 
 COPY entrypoint.sh /entrypoint.sh
-COPY bin/ssh_command.sh /usr/local/bin
+COPY bin/ssh_command.sh /usr/local/bin/ssh_command.sh
+RUN chmod +x /usr/local/bin/ssh_command.sh && \
+    ln -s /usr/local/bin/ssh_command.sh /b
 
 EXPOSE 22/tcp
 

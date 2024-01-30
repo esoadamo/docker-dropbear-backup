@@ -13,3 +13,8 @@ services:
       - BACKUP_USER=rbackup
     ports:
       - 2222:22/tcp
+    # Required for SFTP to work with bubblewrap, https://github.com/flatpak/flatpak/issues/3027
+    security_opt:
+      - apparmor=unconfined
+    cap_add:
+      - CAP_SYS_ADMIN
