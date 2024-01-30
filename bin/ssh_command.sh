@@ -7,10 +7,11 @@ SSH_COMMAND_BIN="${SSH_ORIGINAL_COMMAND%% *}"
 
 BACKUP_USER="root"
 SFTP_ENABLE="no"
+SFTP_PERMISSIONS="sandbox"
 BORG_ENABLE="no"
 RSYNC_ENABLE="no"
 
-while getopts "abrsu:" o; do
+while getopts "Xxabrsu:" o; do
   case "${o}" in
   u)
     BACKUP_USER="u_$OPTARG"
@@ -29,17 +30,25 @@ while getopts "abrsu:" o; do
     BORG_ENABLE="yes"
     RSYNC_ENABLE="yes"
     ;;
+  x)
+    SFTP_PERMISSIONS="all-user-files"
+    ;;
+  X)
+    SFTP_PERMISSIONS="all-files"
+    ;;
   *)
-    help 1
+	printf "Invalid config option\n" >&2
+	exit 1
     ;;
   esac
 done
 shift $((OPTIND - 1))
 
 # Create user home directories
-DIR_BORG="$HOME/$BACKUP_USER/borg/"
-DIR_RSYNC="$HOME/$BACKUP_USER/rsync/"
-DIR_SFTP="$HOME/$BACKUP_USER/sftp/"
+DIR_USER="$HOME/$BACKUP_USER"
+DIR_BORG="$DIR_USER/borg/"
+DIR_RSYNC="$DIR_USER/rsync/"
+DIR_SFTP="$DIR_USER/sftp/"
 
 mkdir -p "$DIR_BORG"
 mkdir -p "$DIR_RSYNC"
@@ -66,6 +75,20 @@ case "${SSH_COMMAND_BIN}" in
 			printf "SFTP disabled\n" >&2
 			exit 1
 		fi
+
+		if [ "$SFTP_PERMISSIONS" == "all-files" ]; then
+			/usr/lib/ssh/sftp-server -d "$DIR_SFTP"
+			exit $?
+		fi
+
+		SFTP_ROOT_DIR="$DIR_SFTP"
+		SFTP_STARTING_DIR="$HOME"
+
+		if [ "$SFTP_PERMISSIONS" == "all-user-files" ]; then
+			SFTP_ROOT_DIR="$DIR_USER"
+			SFTP_STARTING_DIR="$HOME/sftp"
+		fi
+
 		bwrap --die-with-parent \
 		    --ro-bind /usr /usr \
 			--ro-bind /etc /etc \
@@ -77,8 +100,8 @@ case "${SSH_COMMAND_BIN}" in
 			--tmpfs /home \
 			--tmpfs /tmp \
 			--tmpfs /var/tmp \
-			--bind "$DIR_SFTP" "$HOME" \
-			/usr/lib/ssh/sftp-server -d "$HOME"
+			--bind "$SFTP_ROOT_DIR" "$HOME" \
+			/usr/lib/ssh/sftp-server -d "$SFTP_STARTING_DIR"
 		;;
 	*)
 		printf "Access denied, unknown command\n" >&2
