@@ -76,32 +76,15 @@ case "${SSH_COMMAND_BIN}" in
 			exit 1
 		fi
 
-		if [ "$SFTP_PERMISSIONS" == "all-files" ]; then
-			/usr/lib/ssh/sftp-server -d "$DIR_SFTP"
-			exit $?
-		fi
 
 		SFTP_ROOT_DIR="$DIR_SFTP"
-		SFTP_STARTING_DIR="$HOME"
-
 		if [ "$SFTP_PERMISSIONS" == "all-user-files" ]; then
 			SFTP_ROOT_DIR="$DIR_USER"
-			SFTP_STARTING_DIR="$HOME/sftp"
+		elif [ "$SFTP_PERMISSIONS" == "all-files" ]; then
+			SFTP_ROOT_DIR="$HOME"
 		fi
 
-		bwrap --die-with-parent \
-		    --ro-bind /usr /usr \
-			--ro-bind /etc /etc \
-			--ro-bind /var /var \
-			--ro-bind /lib /lib \
-			--ro-bind /bin /bin \
-			--dev /dev \
-			--unshare-pid \
-			--tmpfs /home \
-			--tmpfs /tmp \
-			--tmpfs /var/tmp \
-			--bind "$SFTP_ROOT_DIR" "$HOME" \
-			/usr/lib/ssh/sftp-server -d "$SFTP_STARTING_DIR"
+		rclone --config /rclone.conf serve sftp --stdio local:"$SFTP_ROOT_DIR"
 		;;
 	*)
 		printf "Access denied, unknown command\n" >&2
