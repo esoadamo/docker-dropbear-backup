@@ -6,7 +6,8 @@ if [ "${BACKUP_USER:=rbackup}" ] && ! grep -q -s "^${BACKUP_USER}" /etc/passwd; 
 	( cd "/home/${BACKUP_USER}" && mkdir -p .ssh && touch .ssh/authorized_keys )
 fi
 
-chown -R "${BACKUP_USER}":"${BACKUP_USER}" "/home/${BACKUP_USER}/" && \
+chown "${BACKUP_USER}":"${BACKUP_USER}" "/home/${BACKUP_USER}/" && \
+chown -R "${BACKUP_USER}":"${BACKUP_USER}" "/home/${BACKUP_USER}/.ssh" && \
 chmod 750 "/home/${BACKUP_USER}/.ssh" && \
 chmod 640 "/home/${BACKUP_USER}/.ssh/authorized_keys" &&
 
